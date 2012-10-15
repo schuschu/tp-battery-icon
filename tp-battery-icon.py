@@ -55,7 +55,7 @@ def write_sysfs(path, value):
 
 def read_acpi(param):
     try:
-        cmd = ["tpacpi-bat", param, "1"] #TODO: convert bat0=1 bat1=2, both=0
+        cmd = ["tpacpi-bat", param, "1"] #TODO: convert bat0=1 bat1=2, both=0 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         result = process.stdout.read()
         return result
@@ -64,7 +64,7 @@ def read_acpi(param):
 
 def write_acpi(param, value):
     try:
-        cmd = ["tpacpi-bat", param, "1", str(value)] #TODO: convert bat0=1 bat1=2, both=0
+        cmd = ["tpacpi-bat", param, "1", str(value)] #TODO: convert bat0=1 bat1=2, both=0 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     except:
         print("error setting parameter ", param, ", check if acpi_call is installed and supported on your device!")
@@ -91,6 +91,8 @@ class Control():
                 if acpi==False:
                     write_sysfs("stop_charge_thresh", thresh)
                 else:
+                    if thresh==100:
+                        thresh=0
                     write_acpi("stopChargeThreshold", thresh)
 
     def start_charge(self, widget=None):
@@ -123,7 +125,10 @@ class Control():
             return int(thresh)
         else:
             thresh = read_acpi("stopChargeThreshold")
-            return int(thresh)
+            ithresh = int(thresh)
+            if ithresh==0:
+                ithresh=100
+            return ithresh
 
     def get_state(self):
         """return values: idle, discharging, charging, none"""
@@ -278,8 +283,8 @@ class TrayIcon():
             if 0 <= thresh <= 100:
                 ctrl.set_threshold_start(thresh)
         except ValueError:
-             print("Invalid value in dialog!") #TODO: use message dialog
-
+             print("Invalid value in dialog!") #TODO: use message dialog 
+    
     def set_threshold_stop(self, widget):
         try:
             thresh = int(widget.get_text())
